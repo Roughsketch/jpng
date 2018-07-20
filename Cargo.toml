@@ -2,6 +2,13 @@
 name = "jpng"
 version = "0.1.0"
 authors = ["Maid Dog <maiddogsrl@gmail.com>"]
+description = "Library for handling JPNG images."
+documentation = "https://docs.rs/jpng"
+repository = "https://github.com/Roughsketch/jpng"
+readme = "README.md"
+keywords = ["image", "jpng"]
+categories = ["multimedia", "multimedia::images"]
+license = "MIT"
 
 [dependencies]
 byteorder = "1.2.3"
