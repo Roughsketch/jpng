@@ -36,11 +36,17 @@ impl JpngFooter {
             identifier: reader.read_u32::<LittleEndian>()?,
         };
 
+        //  Ensure that the identifier is correct before finishing.
         ensure!(footer.identifier == JPNG_IDENTIFIER, JpngError::InvalidImage);
 
         Ok(footer)
     }
 
+    /// Gives a default representation of a JpngFooter.
+    /// 
+    /// Footer size is automatically set to the size of the struct,
+    /// the major_version is set to 1 since it is the minimum version,
+    /// and the identifier is set to its expected value.
     pub fn default() -> Self {
         Self {
             image_size: 0,
@@ -52,10 +58,13 @@ impl JpngFooter {
         }
     }
 
+    /// Gives a string representation of the version as declared by
+    /// the footer. For example, "1.0".
     pub fn version(&self) -> String {
         format!("{}.{}", self.major_version, self.minor_version)
     }
 
+    /// Gives the range that the image component is in.
     pub fn image_range(&self) -> Range<usize> {
         Range {
             start: 0,
@@ -63,6 +72,7 @@ impl JpngFooter {
         }
     }
 
+    /// Gives the range that the mask component is in.
     pub fn mask_range(&self) -> Range<usize> {
         Range {
             start: self.image_size as usize,

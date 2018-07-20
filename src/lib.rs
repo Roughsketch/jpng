@@ -35,9 +35,13 @@ impl Jpng {
         
         File::open(path)?.read_to_end(&mut contents)?;
 
+        //  Fail early if the contents cannot hold a valid JpngFooter.
         ensure!(contents.len() > footer_size, JpngError::InvalidImage);
         
+        //  Create the footer from the last bytes of the given file.
         let footer = JpngFooter::new(&contents[contents.len() - footer_size..])?;
+        
+        //  Using the footer information, load the JPG and PNG components.
         let image = image::load_from_memory(&contents[footer.image_range()])?;
         let mask = image::load_from_memory(&contents[footer.mask_range()])?;
 
@@ -49,6 +53,10 @@ impl Jpng {
     }
 
     /// Saves the JPNG image as a PNG with the combined image and mask.
+    /// 
+    /// The name passed to this method must be the basename without an
+    /// extension. This is because .png is automatically appended to it
+    /// in order to ensure it encodes the right format.
     pub fn save(&self, basename: &str) -> Result<(), Error> {
         //  Get luma values from mask
         let luma = self.mask.to_luma();
