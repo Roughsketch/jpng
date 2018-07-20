@@ -1,0 +1,69 @@
+use super::JpngError;
+
+use byteorder::{LittleEndian, ReadBytesExt};
+use failure::Error;
+use std::io::Cursor;
+use std::mem;
+use std::ops::Range;
+
+#[derive(Copy, Clone, Debug)]
+pub struct JpngFooter {
+    pub image_size: u32,
+    pub mask_size: u32,
+    footer_size: u16,
+    pub major_version: u8,
+    pub minor_version: u8,
+    identifier: u32,
+}
+
+const JPNG_IDENTIFIER: u32 = 0x4A504E47;
+
+impl JpngFooter {
+    pub fn new(data: &[u8]) -> Result<Self, Error> {
+        ensure!(data.len() == 16, JpngError::InvalidFooterLen);
+        
+        let mut reader = Cursor::new(data);
+
+        let footer = Self {
+            image_size: reader.read_u32::<LittleEndian>()?,
+            mask_size: reader.read_u32::<LittleEndian>()?,
+            footer_size: reader.read_u16::<LittleEndian>()?,
+            major_version: reader.read_u8()?,
+            minor_version: reader.read_u8()?,
+            identifier: reader.read_u32::<LittleEndian>()?,
+        };
+
+        ensure!(footer.identifier == JPNG_IDENTIFIER, JpngError::InvalidImage);
+
+        Ok(footer)
+    }
+
+    pub fn default() -> Self {
+        Self {
+            image_size: 0,
+            mask_size: 0,
+            footer_size: mem::size_of::<JpngFooter>() as u16,
+            major_version: 1,
+            minor_version: 0,
+            identifier: JPNG_IDENTIFIER,
+        }
+    }
+
+    pub fn version(&self) -> String {
+        format!("{}.{}", self.major_version, self.minor_version)
+    }
+
+    pub fn image_range(&self) -> Range<usize> {
+        Range {
+            start: 0,
+            end: self.image_size as usize,
+        }
+    }
+
+    pub fn mask_range(&self) -> Range<usize> {
+        Range {
+            start: self.image_size as usize,
+            end: (self.image_size + self.mask_size) as usize,
+        }
+    }
+}

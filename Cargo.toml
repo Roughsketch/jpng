@@ -1,0 +1,12 @@
+[package]
+name = "jpng"
+version = "0.1.0"
+authors = ["Maid Dog <maiddogsrl@gmail.com>"]
+
+[dependencies]
+byteorder = "1.2.3"
+failure = "0.1.1"
+
+[dependencies.image]
+version = "0.19"
+features = ["jpeg", "jpeg_rayon", "png_codec"]
