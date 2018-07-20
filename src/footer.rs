@@ -20,7 +20,10 @@ const JPNG_IDENTIFIER: u32 = 0x4A504E47;
 
 impl JpngFooter {
     pub fn new(data: &[u8]) -> Result<Self, Error> {
-        ensure!(data.len() == 16, JpngError::InvalidFooterLen);
+        //  Fail if the length of the data given doesn't match
+        //  the footer's expected size.
+        ensure!(data.len() == mem::size_of::<JpngFooter>(), 
+            JpngError::InvalidFooterLen);
         
         let mut reader = Cursor::new(data);
 
